@@ -1,2 +1,7 @@
 # MyST build outputs
 _build
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup

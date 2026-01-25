@@ -1,10 +1,10 @@
 project:
   type: website
-  output-dir: _site
+  output-dir: ../_site
 
 website:
   title: "Alex's Notes"
-  description: "Personal blog sobre Machine Learning, Finanzas y más"
+  description: "Notas personales sobre Machine Learning, matemáticas y más"
   site-url: "http://alexnotes-blog-2026.s3-website-eu-west-1.amazonaws.com"
 
   navbar:
@@ -13,23 +13,12 @@ website:
     left:
       - text: "Home"
         href: index.qmd
-      - text: "Posts"
-        href: posts.qmd
-      - text: "Machine Learning"
-        href: ml/index.qmd
-      - text: "Finanzas"
-        href: finance/index.qmd
-      - text: "Desarrollo"
-        href: dev/index.qmd
     right:
-      - icon: github
+      - text: "GitHub"
         href: https://github.com/AlexNitid/fabad_experimental
 
   page-footer:
-    left: "© 2026 Alex de la Puente"
-    right:
-      - icon: github
-        href: https://github.com/AlexNitid/fabad_experimental
+    left: "Alex de la Puente"
 
 format:
   html:
@@ -45,3 +34,4 @@ format:
 
 execute:
   freeze: auto
+  enabled: false

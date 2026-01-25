@@ -4,7 +4,7 @@ Blog personal de notas, apuntes y experimentos técnicos construido con Quarto y
 
 ## 🎯 Qué es esto
 
-Este repositorio contiene mis notas personales sobre Machine Learning, Finanzas, Desarrollo y otros temas. Está diseñado como un blog personal con contenido variado organizado por categorías, sin necesidad de seguir un orden lineal.
+Mis notas personales sobre machine learning, matemáticas, finanzas y lo que me resulte interesante. Sin orden particular, sin categorías predefinidas. Solo escribo cuando algo me cuesta entender o cuando quiero documentar algo para no olvidarlo.
 
 El sitio se construye automáticamente con Quarto y se despliega en AWS S3 cada vez que hago push a `main`.
 
@@ -33,11 +33,11 @@ quarto --version
 
 ### 1. Añadir nuevo contenido
 
-Crea archivos `.qmd` (Quarto Markdown) o `.ipynb` en el directorio `posts/`:
+Crea archivos `.qmd` (Quarto Markdown) o `.ipynb` en `site/posts/`:
 
 ```bash
 # Crear un nuevo post
-touch posts/mi-nueva-nota.qmd
+touch site/posts/mi-nueva-nota.qmd
 ```
 
 Estructura básica de un post:
@@ -48,28 +48,24 @@ title: "Título de mi nota"
 description: "Breve descripción"
 author: "Alex de la Puente"
 date: "2026-01-25"
-categories: [machine-learning, python]
+categories: [machine-learning, matematicas]
 ---
 
-## Introducción
+## Contenido
 
 Tu contenido aquí...
 
 \```{python}
-# Código ejecutable (opcional)
+# Código ejecutable (opcional, requiere Python)
 print("Hola mundo")
 \```
 ```
 
-Categorías disponibles:
-- `machine-learning` → Aparece en /ml
-- `finanzas` → Aparece en /finance
-- `desarrollo` → Aparece en /dev
-
 ### 2. Previsualizar localmente
 
 ```bash
-# Servidor de desarrollo (con hot-reload)
+# Desde el directorio site/
+cd site
 quarto preview
 
 # Esto abre automáticamente http://localhost:4200
@@ -79,25 +75,12 @@ quarto preview
 O construir sin servidor:
 
 ```bash
-# Solo construir
+cd site
 quarto render
-
-# Abrir resultado
-open _site/index.html
+open ../_site/index.html
 ```
 
-### 3. Organización automática
-
-**No necesitas actualizar ningún índice manualmente.** Quarto descubre automáticamente:
-
-- Todos los posts en `posts/` → Aparecen en `/posts.html`
-- Posts con categoría `machine-learning` → Aparecen en `/ml`
-- Posts con categoría `finanzas` → Aparecen en `/finance`
-- Posts con categoría `desarrollo` → Aparecen en `/dev`
-
-Los listados se ordenan automáticamente por fecha (más reciente primero).
-
-### 4. Publicar cambios
+### 3. Publicar cambios
 
 ```bash
 git add .
@@ -150,56 +133,50 @@ http://alexnotes-blog-2026.s3-website-eu-west-1.amazonaws.com
 
 ```
 .
-├── posts/              # Tus posts/notas (archivos .qmd o .ipynb)
-│   ├── ejemplo-ml.qmd
-│   ├── ejemplo-finanzas.qmd
-│   └── ejemplo-desarrollo.qmd
-├── ml/                 # Página índice de Machine Learning
-│   └── index.qmd
-├── finance/            # Página índice de Finanzas
-│   └── index.qmd
-├── dev/                # Página índice de Desarrollo
-│   └── index.qmd
+├── site/               # Todo el contenido de Quarto
+│   ├── _quarto.yml     # Configuración principal
+│   ├── index.qmd       # Página de inicio (lista posts automáticamente)
+│   ├── styles.css      # Estilos personalizados
+│   └── posts/          # Tus posts/notas (.qmd o .ipynb)
+│       └── vae-elbo-loss.qmd
 ├── infra/              # Infraestructura Terraform
 │   ├── main.tf
 │   ├── s3.tf
 │   └── variables.tf
 ├── .github/workflows/
 │   └── deploy.yml      # CI/CD automático
-├── _quarto.yml         # Configuración principal de Quarto
-├── index.qmd           # Página de inicio
-├── posts.qmd           # Listado de todos los posts
-├── styles.css          # Estilos personalizados
-└── _site/              # Salida de construcción (ignorado en git)
+├── _site/              # Salida de construcción (ignorado en git)
+├── README.md
+└── pyproject.toml
 ```
 
 ## 🔧 Comandos útiles
 
 ```bash
 # Servidor de desarrollo con hot-reload
-quarto preview
+cd site && quarto preview
 
 # Construir el sitio
-quarto render
+cd site && quarto render
 
 # Limpiar builds anteriores
-rm -rf _site .quarto
+rm -rf _site site/.quarto _freeze
 
 # Ver logs de Terraform
 cd infra && terraform show
 
 # Sincronizar manualmente a S3 (si no quieres esperar al CI)
-quarto render && aws s3 sync _site s3://alexnotes-blog-2026 --region eu-west-1 --delete
+cd site && quarto render && aws s3 sync ../_site s3://alexnotes-blog-2026 --region eu-west-1 --delete
 
 # Validar sintaxis de un archivo
-quarto check <archivo.qmd>
+quarto check site/posts/mi-post.qmd
 ```
 
 ## 🎨 Personalización
 
 ### Cambiar el tema
 
-Edita `_quarto.yml`:
+Edita `site/_quarto.yml`:
 
 ```yaml
 format:
@@ -211,35 +188,9 @@ format:
 
 Temas disponibles: https://quarto.org/docs/output-formats/html-themes.html
 
-### Añadir nueva categoría
-
-1. Crea un directorio con `index.qmd`:
-
-```bash
-mkdir nueva-categoria
-cat > nueva-categoria/index.qmd <<EOF
----
-title: "Nueva Categoría"
-listing:
-  contents: ../posts
-  include:
-    categories: ["nueva-categoria"]
----
-EOF
-```
-
-2. Añádela al navbar en `_quarto.yml`:
-
-```yaml
-navbar:
-  left:
-    - text: "Nueva Categoría"
-      href: nueva-categoria/index.qmd
-```
-
 ### Estilos personalizados
 
-Edita `styles.css` para cambiar colores, fuentes, etc.
+Edita `site/styles.css` para cambiar colores, fuentes, etc.
 
 ## 🐛 Troubleshooting
 

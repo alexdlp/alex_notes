@@ -1,0 +1,13 @@
+---
+title: "Alex's Notes"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  fields: [title, date, description]
+  date-format: "D MMMM YYYY"
+---
+
+Esto es donde escribo cosas que quiero entender mejor. Principalmente sobre machine learning, matemáticas, finanzas cuantitativas y lo que me resulte interesante en ese momento.
+
+No hay un orden particular. Escribo cuando algo me cuesta entender o cuando implemento algo y quiero documentar el proceso para no olvidarlo.

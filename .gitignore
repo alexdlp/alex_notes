@@ -1,6 +1,7 @@
 # Quarto build outputs
 _site/
 /.quarto/
+_freeze/
 
 # Terraform
 infra/.terraform/

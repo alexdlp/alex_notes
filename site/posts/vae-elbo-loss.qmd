@@ -1,0 +1,135 @@
+---
+title: "Entendiendo el ELBO en Variational Autoencoders"
+description: "Derivación paso a paso de la función de pérdida ELBO en VAEs"
+author: "Alex de la Puente"
+date: "2026-01-25"
+categories: [machine-learning, vae, matematicas]
+---
+
+## Qué es esto
+
+Los Variational Autoencoders (VAEs) son modelos generativos que aprenden a codificar datos en un espacio latente y luego reconstruirlos. La clave está en cómo optimizamos estos modelos, y ahí es donde entra el ELBO (Evidence Lower BOund).
+
+Este post es mi intento de entender bien las matemáticas detrás del ELBO. Lo escribo porque siempre que leo papers sobre VAEs me pierdo en las derivaciones, y necesito tenerlo claro para mí.
+
+## El problema que queremos resolver
+
+Tenemos datos $\mathbf{x}$ y queremos aprender una distribución $p(\mathbf{x})$ que los genere. En un VAE asumimos que existe una variable latente $\mathbf{z}$ tal que:
+
+$$
+p(\mathbf{x}) = \int p(\mathbf{x}|\mathbf{z}) p(\mathbf{z}) d\mathbf{z}
+$$
+
+El problema es que esta integral es intratable en la mayoría de casos interesantes. No podemos calcularla directamente.
+
+## Por qué necesitamos el ELBO
+
+Lo que realmente queremos maximizar es la log-verosimilitud de nuestros datos:
+
+$$
+\log p(\mathbf{x}) = \log \int p(\mathbf{x}|\mathbf{z}) p(\mathbf{z}) d\mathbf{z}
+$$
+
+Pero como dije, esa integral es imposible de calcular. Así que en vez de maximizar $\log p(\mathbf{x})$ directamente, vamos a maximizar una cota inferior (lower bound) de eso. Esa cota es el ELBO.
+
+## Derivando el ELBO
+
+Empezamos introduciendo una distribución variacional $q(\mathbf{z}|\mathbf{x})$, que es nuestra aproximación a la verdadera posterior $p(\mathbf{z}|\mathbf{x})$ (que tampoco podemos calcular).
+
+Partimos de $\log p(\mathbf{x})$ y hacemos este truco:
+
+$$
+\log p(\mathbf{x}) = \log \int p(\mathbf{x}, \mathbf{z}) d\mathbf{z}
+$$
+
+Multiplicamos y dividimos por $q(\mathbf{z}|\mathbf{x})$:
+
+$$
+\log p(\mathbf{x}) = \log \int \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} q(\mathbf{z}|\mathbf{x}) d\mathbf{z}
+$$
+
+Ahora usamos que esto es una esperanza sobre $q(\mathbf{z}|\mathbf{x})$:
+
+$$
+\log p(\mathbf{x}) = \log \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} \left[ \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right]
+$$
+
+Aplicamos la desigualdad de Jensen (el log es cóncavo, así que el log de la esperanza es mayor o igual que la esperanza del log):
+
+$$
+\log p(\mathbf{x}) \geq \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} \left[ \log \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right]
+$$
+
+El lado derecho es el ELBO. Llamémoslo $\mathcal{L}$:
+
+$$
+\mathcal{L} = \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} \left[ \log \frac{p(\mathbf{x}, \mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right]
+$$
+
+## Reescribiendo el ELBO
+
+Podemos reescribir esto de forma más útil. Primero, usamos que $p(\mathbf{x}, \mathbf{z}) = p(\mathbf{x}|\mathbf{z}) p(\mathbf{z})$:
+
+$$
+\mathcal{L} = \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} \left[ \log p(\mathbf{x}|\mathbf{z}) + \log p(\mathbf{z}) - \log q(\mathbf{z}|\mathbf{x}) \right]
+$$
+
+Separamos la esperanza:
+
+$$
+\mathcal{L} = \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} [\log p(\mathbf{x}|\mathbf{z})] + \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} \left[ \log \frac{p(\mathbf{z})}{q(\mathbf{z}|\mathbf{x})} \right]
+$$
+
+El segundo término es el negativo de la divergencia KL entre $q(\mathbf{z}|\mathbf{x})$ y $p(\mathbf{z})$:
+
+$$
+\mathcal{L} = \mathbb{E}_{q(\mathbf{z}|\mathbf{x})} [\log p(\mathbf{x}|\mathbf{z})] - D_{KL}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))
+$$
+
+Esta es la forma más común del ELBO.
+
+## Interpretación
+
+Tenemos dos términos:
+
+1. **Reconstruction term**: $\mathbb{E}_{q(\mathbf{z}|\mathbf{x})} [\log p(\mathbf{x}|\mathbf{z})]$
+   - Mide qué tan bien el modelo reconstruye $\mathbf{x}$ desde $\mathbf{z}$
+   - En la práctica, es el error de reconstrucción
+
+2. **Regularization term**: $-D_{KL}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))$
+   - Mide qué tan cerca está nuestra posterior aproximada de la prior
+   - Típicamente $p(\mathbf{z}) = \mathcal{N}(0, I)$
+   - Evita que el encoder "haga trampa" y codifique todo de forma perfecta sin generalizar
+
+## La loss function en la práctica
+
+Cuando entrenamos un VAE, minimizamos el negativo del ELBO:
+
+$$
+\mathcal{L}_{\text{VAE}} = -\mathbb{E}_{q(\mathbf{z}|\mathbf{x})} [\log p(\mathbf{x}|\mathbf{z})] + D_{KL}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))
+$$
+
+Si asumimos que:
+- $p(\mathbf{x}|\mathbf{z})$ es una Gaussiana, el primer término es un error cuadrático medio (MSE)
+- $q(\mathbf{z}|\mathbf{x}) = \mathcal{N}(\mu(\mathbf{x}), \sigma^2(\mathbf{x}))$ y $p(\mathbf{z}) = \mathcal{N}(0, I)$, la KL tiene forma cerrada:
+
+$$
+D_{KL} = \frac{1}{2} \sum_{i=1}^{d} \left( \mu_i^2 + \sigma_i^2 - \log \sigma_i^2 - 1 \right)
+$$
+
+## Por qué funciona
+
+El ELBO es una cota inferior de $\log p(\mathbf{x})$. La diferencia entre ambos es exactamente la KL entre nuestra aproximación $q(\mathbf{z}|\mathbf{x})$ y la verdadera posterior $p(\mathbf{z}|\mathbf{x})$:
+
+$$
+\log p(\mathbf{x}) = \mathcal{L} + D_{KL}(q(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}|\mathbf{x}))
+$$
+
+Como la KL siempre es no-negativa, maximizar el ELBO también acerca nuestra aproximación variacional a la verdadera posterior.
+
+## Referencias
+
+Esto lo he sacado de:
+- Kingma & Welling (2013) - Auto-Encoding Variational Bayes
+- Doersch (2016) - Tutorial on Variational Autoencoders
+- Mis notas de cuando intenté implementar un VAE y no entendía nada

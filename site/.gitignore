@@ -1,0 +1,22 @@
+# Quarto build outputs
+_site/
+/.quarto/
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.python-version
+
+# macOS
+.DS_Store
+
+/.quarto/
+**/*.quarto_ipynb

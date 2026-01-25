@@ -2,13 +2,13 @@
 
 Blog personal de notas, apuntes y experimentos técnicos construido con MyST (Markedly Structured Text) y desplegado automáticamente en AWS S3.
 
-## 🎯 Qué es esto
+## Qué es esto
 
 Este repositorio contiene mis notas personales sobre estudios, aprendizajes y desarrollos varios. Está diseñado como un blog de notas más que como un libro tradicional, con contenido variado y no necesariamente estructurado de forma lineal.
 
 El sitio se construye automáticamente y se despliega en AWS S3 cada vez que hago push a `main`.
 
-## 🚀 Cómo empezar
+## Cómo empezar
 
 ### Requisitos previos
 
@@ -26,7 +26,7 @@ uv sync
 pip install -e .
 ```
 
-## 📝 Flujo de trabajo habitual
+## Flujo de trabajo habitual
 
 ### 1. Añadir nuevo contenido
 
@@ -81,7 +81,7 @@ El workflow de GitHub Actions (`deploy.yml`) se encargará de:
 3. Sincronizar `_build/html/` a S3
 4. El sitio estará disponible en la URL del bucket S3
 
-## 🏗️ Infraestructura
+## Infraestructura
 
 ### Desplegar infraestructura inicial
 
@@ -116,7 +116,7 @@ Una vez desplegado, el sitio estará en:
 http://alexnotes-blog-2026.s3-website-eu-west-1.amazonaws.com
 ```
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 .
@@ -132,7 +132,7 @@ http://alexnotes-blog-2026.s3-website-eu-west-1.amazonaws.com
 └── _build/             # Salida de construcción (ignorado en git)
 ```
 
-## 🔧 Comandos útiles
+## Comandos útiles
 
 ```bash
 # Construir el sitio
@@ -151,7 +151,7 @@ cd infra && terraform show
 aws s3 sync _build/html s3://alexnotes-blog-2026 --region eu-west-1
 ```
 
-## 🎨 Personalización
+## Personalización
 
 ### Cambiar el tema
 
@@ -177,7 +177,7 @@ project:
     - name: Alex de la Puente
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **Error al construir**: Asegúrate de tener todas las dependencias instaladas
 ```bash

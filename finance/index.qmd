@@ -1,0 +1,15 @@
+---
+title: "Finanzas"
+listing:
+  contents: ../posts
+  sort: "date desc"
+  type: default
+  categories: true
+  filter-ui: true
+  fields: [title, date, description, categories]
+  include:
+    categories: ["finanzas"]
+page-layout: full
+---
+
+Notas sobre finanzas cuantitativas, trading, análisis de mercados y modelos financieros.

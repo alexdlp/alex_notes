@@ -1,0 +1,15 @@
+---
+title: "Machine Learning"
+listing:
+  contents: ../posts
+  sort: "date desc"
+  type: default
+  categories: true
+  filter-ui: true
+  fields: [title, date, description, categories]
+  include:
+    categories: ["machine-learning"]
+page-layout: full
+---
+
+Notas y experimentos relacionados con Machine Learning, Deep Learning, NLP y más.

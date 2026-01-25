@@ -1,0 +1,48 @@
+/* Custom styles for Alex's Notes */
+
+/* Improve code block appearance */
+pre {
+  border-radius: 8px;
+  border-left: 4px solid var(--bs-primary);
+}
+
+/* Better spacing for content */
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Customize navbar */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Post listing cards */
+.quarto-listing-default .listing-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.quarto-listing-default .listing-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Category badges */
+.listing-category {
+  background-color: var(--bs-primary);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-right: 0.5rem;
+}
+
+/* Improve table of contents */
+#TOC {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem;
+}

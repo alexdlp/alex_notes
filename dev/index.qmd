@@ -1,0 +1,15 @@
+---
+title: "Desarrollo"
+listing:
+  contents: ../posts
+  sort: "date desc"
+  type: default
+  categories: true
+  filter-ui: true
+  fields: [title, date, description, categories]
+  include:
+    categories: ["desarrollo"]
+page-layout: full
+---
+
+Tutoriales, configuraciones y notas sobre desarrollo de software, DevOps y herramientas.

@@ -1,118 +1,95 @@
 # 💡 Propuestas de Mejora para Alex's Notes
 
+## ✅ Migración a Quarto completada
+
+El proyecto ha sido migrado exitosamente de Jupyter Book a Quarto. Esto ya soluciona muchos de los problemas de diseño y organización que tenía el proyecto original:
+
+- ✅ Tema más orientado a blog
+- ✅ Sistema de categorías automático
+- ✅ Listados de posts por fecha
+- ✅ Búsqueda integrada
+- ✅ Modo oscuro/claro automático
+
 ## 🎨 Apariencia y Diseño
 
-### 1. Cambiar a un tema más orientado a blog
-**Problema**: Actualmente usas `book-theme` que está pensado para libros lineales.
-
-**Solución**: Considera cambiar a templates más modernos:
-- **MyST Article Theme**: Más limpio para artículos independientes
-- **Sphinx Book Theme personalizado**: Permite más customización
-- **Alternativa**: Usar un generador de sitios estáticos como:
-  - **Quarto** (similar a MyST pero más orientado a publicaciones)
-  - **MkDocs Material** (muy popular para documentación técnica estilo blog)
-
-**Implementación sugerida**:
-```yaml
-# myst.yml
-site:
-  template: article-theme  # Prueba este primero
-  options:
-    logo: assets/logo.png
-    favicon: assets/favicon.ico
-```
-
-### 2. Añadir un logo y favicon personalizados
+### 1. Añadir un logo y favicon personalizados
 Crea una carpeta `assets/` y añade:
 - `logo.png` (recomendado: 200x50px)
 - `favicon.ico` (16x16px y 32x32px)
 
-### 3. Implementar tags/etiquetas por tema
-Para un blog de notas variadas es crucial la categorización:
+Luego actualiza `_quarto.yml`:
+```yaml
+website:
+  favicon: assets/favicon.ico
+  navbar:
+    logo: assets/logo.png
+```
 
-```markdown
+### 2. Añadir listado de "Últimas notas" en la home
+
+Actualmente `index.qmd` es estático. Puedes añadir un listado automático:
+
+```yaml
 ---
-title: Mi nota sobre Machine Learning
-tags: [machine-learning, python, sklearn]
-date: 2026-01-25
+title: "Alex's Notes"
+listing:
+  contents: posts
+  sort: "date desc"
+  max-items: 5
+  type: grid
+  fields: [title, date, description, categories]
 ---
 ```
 
-Luego podrías crear páginas índice por tag.
+### 3. Probar diferentes temas
 
-### 4. Añadir un sistema de fechas y "últimas notas"
-Modifica `index.md` para que muestre las últimas entradas:
+Quarto tiene muchos temas built-in. Edita `_quarto.yml`:
 
-```markdown
-# Alex's Notes
-
-## Últimas notas
-- [2026-01-25] Introducción a Transformers
-- [2026-01-20] Setup de Docker en MacOS
-- [2026-01-15] Apuntes de AWS Lambda
+```yaml
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]  # Prueba: flatly, minty, pulse
+      dark: [darkly, custom.scss]   # Prueba: cyborg, slate, superhero
 ```
 
-Esto se puede automatizar con un script Python.
+Lista completa: https://quarto.org/docs/output-formats/html-themes.html
 
 ---
 
 ## 📂 Estructura y Organización
 
-### 5. Reorganizar contenido por categorías
-Propuesta de estructura:
+### 4. Añadir imágenes destacadas a los posts
 
-```
-.
-├── machine-learning/
-│   ├── _category.md
-│   ├── transformers.md
-│   └── sklearn-tips.ipynb
-├── devops/
-│   ├── _category.md
-│   ├── docker.md
-│   └── kubernetes.md
-├── programming/
-│   ├── python/
-│   ├── rust/
-│   └── web/
-├── random/              # Para experimentos y notas variadas
-└── index.md
+Las imágenes hacen los listados más atractivos:
+
+```markdown
+---
+title: "Mi Post"
+image: "thumbnail.jpg"  # Imagen en el mismo directorio que el post
+---
 ```
 
-Cada `_category.md` describe la categoría.
-
-### 6. Crear un `_toc.yml` automático
-Script para generar tabla de contenidos basado en la estructura de carpetas:
-
-```python
-# scripts/generate_toc.py
-import os
-from pathlib import Path
-import yaml
-
-def generate_toc():
-    # Escanea directorios y genera _toc.yml automáticamente
-    pass
+O usa imágenes remotas:
+```markdown
+image: "https://unsplash.com/photos/..."
 ```
 
 ---
 
 ## 🚀 Funcionalidades Técnicas
 
-### 7. Mejorar el workflow de GitHub Actions
+### 5. Mejorar el workflow de GitHub Actions
 
 **Optimizaciones sugeridas**:
 
 ```yaml
 # .github/workflows/deploy.yml
-- name: Cache dependencies
+- name: Cache Quarto
   uses: actions/cache@v4
   with:
-    path: ~/.cache/pip
-    key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
-
-- name: Install AWS CLI
-  run: pip install awscli  # El workflow actual asume que ya está
+    path: ~/.quarto
+    key: ${{ runner.os }}-quarto-${{ hashFiles('_quarto.yml') }}
 
 - name: Invalidate CloudFront (si usas CDN)
   run: aws cloudfront create-invalidation --distribution-id XXX --paths "/*"
@@ -200,24 +177,27 @@ repos:
 
 Instala: `pip install pre-commit && pre-commit install`
 
-### 10. Búsqueda de contenido
+### 6. RSS Feed automático
 
-MyST y Jupyter Book soportan búsqueda. Actívala en `myst.yml`:
+Quarto puede generar RSS feeds automáticamente. Añade a `_quarto.yml`:
 
 ```yaml
-site:
-  template: book-theme
-  options:
-    search: true  # Añade barra de búsqueda
+website:
+  site-url: "http://alexnotes-blog-2026.s3-website-eu-west-1.amazonaws.com"
+  rss:
+    items: 20
+    image: "assets/logo.png"
 ```
+
+Esto genera automáticamente `index.xml` que los lectores RSS pueden suscribirse.
 
 ---
 
 ## 📝 Calidad de Vida
 
-### 11. Script de creación rápida de notas
+### 7. Script de creación rápida de notas
 
-Crea `scripts/new_note.py`:
+Crea `scripts/new_post.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -225,66 +205,76 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-def create_note(category, title):
+def create_post(title, categories=""):
     slug = title.lower().replace(" ", "-")
     date = datetime.now().strftime("%Y-%m-%d")
 
-    category_dir = Path(category)
-    category_dir.mkdir(exist_ok=True)
+    posts_dir = Path("posts")
+    posts_dir.mkdir(exist_ok=True)
 
-    note_path = category_dir / f"{slug}.md"
+    post_path = posts_dir / f"{slug}.qmd"
+
+    cats = [f'"{c.strip()}"' for c in categories.split(",")] if categories else []
+    cats_str = f"[{', '.join(cats)}]" if cats else "[]"
 
     content = f"""---
-title: {title}
-date: {date}
-tags: []
+title: "{title}"
+description: ""
+author: "Alex de la Puente"
+date: "{date}"
+categories: {cats_str}
 ---
 
-# {title}
+## Introducción
 
 Escribe tu contenido aquí...
 """
 
-    note_path.write_text(content)
-    print(f"✅ Nota creada: {note_path}")
+    post_path.write_text(content)
+    print(f"✅ Post creado: {post_path}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Uso: ./scripts/new_note.py <categoría> <título>")
+    if len(sys.argv) < 2:
+        print("Uso: python scripts/new_post.py '<título>' '[categorías]'")
+        print("Ejemplo: python scripts/new_post.py 'Mi nota' 'machine-learning,python'")
         sys.exit(1)
 
-    create_note(sys.argv[1], sys.argv[2])
+    title = sys.argv[1]
+    categories = sys.argv[2] if len(sys.argv) > 2 else ""
+    create_post(title, categories)
 ```
 
 Uso:
 ```bash
-python scripts/new_note.py machine-learning "Introducción a Transformers"
+python scripts/new_post.py "Introducción a Transformers" "machine-learning,python"
 ```
 
-### 12. Makefile para comandos comunes
+### 8. Makefile para comandos comunes
 
 Crea `Makefile`:
 
 ```makefile
-.PHONY: build serve clean deploy new
+.PHONY: preview build clean deploy new
+
+preview:
+	quarto preview
 
 build:
-	jupyter-book build --html
-
-serve: build
-	open _build/html/index.html
+	quarto render
 
 clean:
-	jupyter-book clean .
+	rm -rf _site .quarto
 
 deploy: build
-	aws s3 sync _build/html s3://alexnotes-blog-2026 --region eu-west-1
+	aws s3 sync _site s3://alexnotes-blog-2026 --region eu-west-1 --delete
 
 new:
-	@echo "Uso: python scripts/new_note.py <categoría> <título>"
+	@read -p "Título: " title; \
+	read -p "Categorías (separadas por coma): " cats; \
+	python scripts/new_post.py "$$title" "$$cats"
 ```
 
-Uso: `make serve`, `make deploy`, etc.
+Uso: `make preview`, `make deploy`, `make new`, etc.
 
 ### 13. GitHub Issue Templates
 
@@ -366,71 +356,81 @@ jobs:
 
 ## 📊 Analytics y Monitorización
 
-### 16. Google Analytics o Plausible
+### 9. Google Analytics
 
-Añade tracking (si te interesa ver qué contenido es más popular):
+Quarto integra fácilmente con Google Analytics. Añade a `_quarto.yml`:
 
-- **Google Analytics**: Clásico pero completo
-- **Plausible**: Privacy-friendly, más simple
+```yaml
+website:
+  google-analytics: "G-XXXXXXXXXX"
+```
+
+Alternativas privacy-friendly:
+- **Plausible**: Añade script en `include-in-header`
 - **Umami**: Self-hosted, open source
 
-Integración en `myst.yml`:
+### 10. Comentarios con Giscus
+
+Añade sistema de comentarios usando GitHub Discussions. En `_quarto.yml`:
+
 ```yaml
-site:
-  analytics:
-    google: "G-XXXXXXXXXX"
+format:
+  html:
+    comments:
+      giscus:
+        repo: tu-usuario/tu-repo
 ```
 
-### 17. RSS Feed para suscriptores
-
-Genera un `feed.xml` automáticamente para que otros puedan seguir tus notas:
-
-```python
-# scripts/generate_rss.py
-# Genera RSS basado en los archivos .md con fecha
-```
+Esto añade automáticamente comentarios en cada post usando GitHub Discussions.
 
 ---
 
 ## 🎯 Prioridades Recomendadas
 
 ### Corto plazo (1-2 sesiones)
-1. ✅ **Reorganizar estructura** de carpetas por temas
-2. ✅ **Crear script** `new_note.py` para facilitar creación
-3. ✅ **Añadir Makefile** para comandos rápidos
-4. ✅ **Mejorar index.md** con últimas notas
+1. ✅ **Migración a Quarto** - COMPLETADO
+2. **Crear script** `new_post.py` para facilitar creación de posts
+3. **Añadir Makefile** para comandos rápidos
+4. **Logo y favicon** personalizados
+5. **Mejorar index.qmd** con listado de últimas notas
 
 ### Medio plazo
-5. **CloudFront + HTTPS** para mejor rendimiento
-6. **Sistema de tags** y páginas índice
-7. **Cambiar tema** a algo más blog-like
+6. **CloudFront + HTTPS** para mejor rendimiento y dominio personalizado
+7. **RSS Feed** automático
 8. **Pre-commit hooks** para validación
+9. **Probar diferentes temas** de Quarto
 
 ### Largo plazo
-9. Analytics si te interesa
-10. Dominio personalizado
-11. Comentarios (Giscus, utterances)
+10. **Analytics** si te interesa
+11. **Dominio personalizado** (notes.alexdelapuente.com)
+12. **Comentarios** (Giscus con GitHub Discussions)
+13. **Búsqueda avanzada** con Algolia o similar
 
 ---
 
-## 🤔 Alternativas a Considerar
+## 🎉 Ventajas de usar Quarto
 
-Si encuentras limitaciones con Jupyter Book, considera:
+Ya que migramos a Quarto, ahora tienes:
 
-1. **Quarto**: Similar pero más flexible, mejor para blogs
-   - Soporta Python, R, Julia, Observable
-   - Themes más modernos out-of-the-box
-   - Mejor integración con blogs multi-categoría
+1. ✅ **Sistema de categorías automático** - No necesitas gestionar índices manualmente
+2. ✅ **Listados por fecha** - Los posts se ordenan automáticamente
+3. ✅ **Búsqueda integrada** - Búsqueda funciona out-of-the-box
+4. ✅ **Temas modernos** - Muchas opciones de diseño
+5. ✅ **Código ejecutable** - Soporta Python, R, Julia, Observable
+6. ✅ **Modo oscuro/claro** - Automático según preferencias del sistema
+7. ✅ **Responsive** - Se ve bien en móvil, tablet y desktop
+8. ✅ **Markdown enriquecido** - LaTeX, callouts, tabsets, etc.
+9. ✅ **Fast refresh** - Cambios se ven instantáneamente con `quarto preview`
 
-2. **MkDocs Material**: Extremadamente popular
-   - UI/UX excepcional
-   - Plugins para tags, búsqueda, RSS
-   - Muy customizable
+## 🔄 Comparación con alternativas
 
-3. **Docusaurus**: Si quieres algo muy moderno
-   - React-based
-   - Usado por Meta, Microsoft
-   - Mejor para docs técnicas
+Si en el futuro quieres explorar otras opciones:
+
+- **MkDocs Material**: Mejor para documentación de software/APIs
+- **Docusaurus**: Si necesitas algo muy React-heavy
+- **Hugo**: Si quieres velocidad extrema (pero menos features para código)
+
+Pero Quarto es ideal para tu caso: blog técnico con código ejecutable.
 
 ---
 

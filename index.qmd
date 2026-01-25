@@ -1,0 +1,7 @@
+---
+title: "Alex's Notes"
+subtitle: "Notas personales sobre Machine Learning, Finanzas y Desarrollo"
+---
+
+Bienvenido a mi espacio personal donde comparto notas, apuntes y experimentos sobre temas que me interesan.
+

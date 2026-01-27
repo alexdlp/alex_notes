@@ -1,16 +1,438 @@
 ---
-title: "Entendiendo el ELBO en Variational Autoencoders"
+title: "Inferencia variacional y ELBO Loss"
 description: "Derivación paso a paso de la función de pérdida ELBO en VAEs"
 author: "Alex de la Puente"
 date: "2026-01-25"
 categories: [machine-learning, vae, matematicas]
+format: html
+execute:
+  enabled: true
+jupyter: python3
 ---
 
-## Qué es esto
 
-Los Variational Autoencoders (VAEs) son modelos generativos que aprenden a codificar datos en un espacio latente y luego reconstruirlos. La clave está en cómo optimizamos estos modelos, y ahí es donde entra el ELBO (Evidence Lower BOund).
 
-Este post es mi intento de entender bien las matemáticas detrás del ELBO. Lo escribo porque siempre que leo papers sobre VAEs me pierdo en las derivaciones, y necesito tenerlo claro para mí.
+Bueno, pues vamos a intentar derivar la funcion de pérdida de un autoencoder variacional.
+
+En un autoencoder normal, lo que hacemos es usar el error de reconstrucción como función 
+de pérdida. Pero, y ¿luego que? ¿Cómo lo hacemos variacional? ¿Y que ~~coño~~ es variacional? 
+¿Que son todas esas historias del ELBO, el KL Divergence y conceptos arcanos?
+
+
+
+Paso a paso. Vamos a ver: 
+
+## Del autoencoder convencional al variacional
+
+Aquí tenemos el esquema de un vanila autoencoder.
+
+::: {#fig-vae style="float: right; margin-right: 20px; margin-bottom: 20px;"}
+```{.tikz}
+%%| filename: vae
+%%| format: svg
+
+\usetikzlibrary{positioning,arrows.meta}
+
+\begin{tikzpicture}[
+  node distance=1.8cm,
+  >=Latex,
+  scale=1.2,
+  transform shape,
+  every node/.style={font=\large},
+  arrow/.style={->, thick}
+]
+
+% Variables con texto debajo
+\node (x) {$x$};
+\node[below=0.4cm of x, font=\small] {Input};
+
+% Encoder (trapecio: ancho a la izquierda, estrecho a la derecha)
+\node[right=1.8cm of x] (enc_center) {};
+\draw[thick] 
+  ([xshift=-1cm, yshift=0.6cm] enc_center.center) -- 
+  ([xshift=1cm, yshift=0.4cm] enc_center.center) -- 
+  ([xshift=1cm, yshift=-0.4cm] enc_center.center) -- 
+  ([xshift=-1cm, yshift=-0.6cm] enc_center.center) -- cycle;
+\node at (enc_center) {\textbf{Encoder}};
+
+% Variable latente
+\node[right=1.8cm of enc_center] (z) {$z$};
+\node[below=0.4cm of z, font=\small] {Latent};
+
+% Decoder (trapecio: estrecho a la izquierda, ancho a la derecha)
+\node[right=1.8cm of z] (dec_center) {};
+\draw[thick] 
+  ([xshift=-1cm, yshift=0.4cm] dec_center.center) -- 
+  ([xshift=1cm, yshift=0.6cm] dec_center.center) -- 
+  ([xshift=1cm, yshift=-0.6cm] dec_center.center) -- 
+  ([xshift=-1cm, yshift=-0.4cm] dec_center.center) -- cycle;
+\node at (dec_center) {\textbf{Decoder}};
+
+% Reconstrucción
+\node[right=1.8cm of dec_center] (xhat) {$\hat{x}$};
+\node[below=0.4cm of xhat, font=\small] {Reconstruction};
+
+% Flechas
+\draw[arrow] (x) -- ([xshift=-1cm] enc_center.center);
+\draw[arrow] ([xshift=1cm] enc_center.center) -- (z);
+\draw[arrow] (z) -- ([xshift=-1cm] dec_center.center);
+\draw[arrow] ([xshift=1cm] dec_center.center) -- (xhat);
+
+\end{tikzpicture}
+```
+
+VAE diagram
+:::
+
+Los datos de entrada $x$ se comprimen por el encoder en un espacio latente $z$ que luego 
+el decoder toma como input para reconstruir $\hat{x}$ usando como función de pérdida el 
+error de reconstrucción (algo como el MSE, o el MAE, lo que queramos). 
+
+Hasta aqui todo bien, todo claro. ¿Cuál es el problema? Pues que sabe diós la forma que 
+tomará ese espacio latente $z$, porque no tenemos ningún tipo de control sobre ella.
+
+Dado que ese espacio latente puede tomar formas incomodas con las que prefeririamos no tener
+que tratar, lo que vamos a hacer es mapearlo a una distribución gaussiana. Esto es lo que convierte a nuestro
+autoencoder clásico en uno **variacional**:
+
+$$P(z|x) \sim N(0,1)$$
+
+Ahora, lo que queremos es que la probabilidad de $z$ dado $x$ se parezca lo máximo posible a una 
+distribución gaussiana estándar (la de media 0 y desviación 1, vaya).
+
+::: {.callout-note collapse="true"}
+## Título de la nota (clic para expandir)
+
+Aquí va el contenido oculto que se despliega al hacer clic.
+Puedes incluir ecuaciones, código, imágenes, etc.
+:::
+
+¿Y como se hace esto? Pues añadiendo un segundo término a nuestra funcion de pérdida basada 
+en la reconstrucción que teníamos antes. 
+
+Lo que queremos es una nueva función de pérdida que penalize 
+al modelo si no es capaz de que $z$ se aproxime a una gaussiana. Hay varias manera de 
+hacerlo (por lo visto), pero la mas habitual es la KL divergence. 
+
+De manera que nuestra nueva y awesome loss function nos quedaría tal que así:
+
+
+$$
+\begin{aligned}
+\mathcal{L} &= \mathcal{L}_{\mathrm{reconstruction}} + D_{\mathrm{KL}}
+\end{aligned}
+$$
+
+## KL Divergence
+
+Una divergencia es una manera de medir la distancia entre distribuciones. Es decir, 
+estas dos distribuciones ¿cuánto se parecen? ¿Mucho?¿Poco? ¿Están cerca? ¿Están lejos? Evidentemente 
+si estan cerca es que *se parecen* mucho, y sino, es que se parecen poco. 
+
+Matematicamente, mediamos la distancia entre dos distribuciones $P$ y $Q$ como:
+
+$$
+D_{KL}(P \| Q) = \sum_{x \in \mathrm{X}} p(x) \log \frac{p(x)}{q(x)} \quad \text{o} \quad \int p(x) \log \frac{p(x)}{q(x)} \, dx
+$$
+
+La primera en su forma discreta y la segunda en su forma continua, pero son equivalentes. Algunas veces 
+lo podremos ver expresado en función de la esperanza también. Pero vamos que es lo mismo. 
+
+$$
+D_{KL}(P \| Q) = \mathbb{E}_{p} \left[ \log \frac{p(x)}{q(x)} \right]
+$$
+
+También podemos reorganizar los términos de la expresión discreta para obtener:
+
+$$
+D_{KL}(P \| Q) = \underbrace{\sum_{x \in \mathrm{X}} p(x) \log p(x)}_{-H(P) \, \text{Negative Entropy}} - \underbrace{\sum_{x \in \mathrm{X}} p(x) \log q(x)}_{CE(P,Q) \, \text{Negative Cross Entropy}}
+$$
+
+Esta reorganización tampoco es que nos diga mucho ahora mismo, pero podriamos reescribir la divergencia:
+
+$$
+D_{KL} = CE(P,Q) - H(P) \Leftrightarrow CE(P,Q) = D_{KL} + H(P)
+$$
+
+Esta identidad tiene su origen en la teoría de la información de Shannon, pero ni es el tema de hoy, ni nos ayuda 
+a deribar y entener la inferencia variacional ni nada, por lo que lo dejamos en el cajón para otro día. De momento,
+solo nos tenemos que quedar con esto: 
+
+$$
+D_{KL}(P \| Q) = \sum_{x \in \mathrm{X}} p(x) \log \frac{p(x)}{q(x)}
+$$
+
+Otra cosa que también vamos a necesitar es el comprender por qué $D_{KL} \geq 0$, también llamada **Desigualdad de Gibbs**.
+
+
+
+```{python}
+#| echo: false
+#| output: false
+import matplotlib
+matplotlib.use('Agg')
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.rcParams.update({
+    'font.size': 18,
+    'axes.titlesize': 16,
+    'axes.labelsize': 16,
+    'xtick.labelsize': 14,
+    'ytick.labelsize': 14,
+    'legend.fontsize': 16,
+    'figure.titlesize': 20
+})
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# === CÓNCAVA: log(x) ===
+x = np.linspace(0.1, 5, 200)
+y = np.log(x)
+
+ax1.plot(x, y, 'b-', linewidth=2.5, label=r'$\log(x)$')
+
+x1, x2 = 0.5, 4
+y1, y2 = np.log(x1), np.log(x2)
+ax1.plot([x1, x2], [y1, y2], 'r--', linewidth=2)
+ax1.scatter([x1, x2], [y1, y2], color='red', s=80, zorder=5)
+
+x_mid = (x1 + x2) / 2
+y_curva = np.log(x_mid)
+y_linea = (y1 + y2) / 2
+
+ax1.scatter([x_mid], [y_curva], color='green', s=100, zorder=5, label=r'$f(\mathbb{E}[X])$')
+ax1.scatter([x_mid], [y_linea], color='orange', s=100, zorder=5, label=r'$\mathbb{E}[f(X)]$')
+
+# Etiquetas con notación lambda
+ax1.annotate(r'$(x_1, f(x_1))$', (x1, y1), textcoords="offset points", xytext=(10, -10))
+ax1.annotate(r'$(x_2, f(x_2))$', (x2, y2), textcoords="offset points", xytext=(5, -15))
+ax1.annotate(r'$\lambda_1 f(x_1) + \lambda_2 f(x_2)$', (x_mid, y_linea), textcoords="offset points", xytext=(15, -12), color='orange')
+ax1.annotate(r'$f(\lambda_1 x_1 + \lambda_2 x_2)$', (x_mid, y_curva), textcoords="offset points", xytext=(-110, 12),  color='green')
+
+ax1.axhline(y=0, color='k', linewidth=0.5)
+ax1.axvline(x=0, color='k', linewidth=0.5)
+ax1.set_xlabel('x')
+ax1.set_ylabel(r'$f(x)$')
+ax1.set_title(r'Cóncava: $f(x) = \log(x)$ → $\mathbb{E}[f(X)] \leq f(\mathbb{E}[X])$')
+ax1.legend(loc='lower right')
+ax1.grid(True, alpha=0.3)
+
+# === CONVEXA: x² ===
+x = np.linspace(-2, 3, 200)
+y = x**2
+
+ax2.plot(x, y, 'b-', linewidth=2.5, label=r'$x^2$')
+
+x1, x2 = -1, 2.5
+y1, y2 = x1**2, x2**2
+ax2.plot([x1, x2], [y1, y2], 'r--', linewidth=2)
+ax2.scatter([x1, x2], [y1, y2], color='red', s=80, zorder=5)
+
+x_mid = (x1 + x2) / 2
+y_curva = x_mid**2
+y_linea = (y1 + y2) / 2
+
+ax2.scatter([x_mid], [y_curva], color='green', s=100, zorder=5, label=r'$f(\mathbb{E}[X])$')
+ax2.scatter([x_mid], [y_linea], color='orange', s=100, zorder=5, label=r'$\mathbb{E}[f(X)]$')
+
+# Etiquetas con notación lambda
+ax2.annotate(r'$(x_1, f(x_1))$', (x1, y1), textcoords="offset points", xytext=(-85, -5))
+ax2.annotate(r'$(x_2, f(x_2))$', (x2, y2), textcoords="offset points", xytext=(-85, 0))
+ax2.annotate(r'$\lambda_1 f(x_1) + \lambda_2 f(x_2)$', (x_mid, y_linea), textcoords="offset points", xytext=(-145, 2),  color='orange')
+ax2.annotate(r'$f(\lambda_1 x_1 + \lambda_2 x_2)$', (x_mid, y_curva), textcoords="offset points", xytext=(15, -2),  color='green')
+
+ax2.axhline(y=0, color='k', linewidth=0.5)
+ax2.axvline(x=0, color='k', linewidth=0.5)
+ax2.set_xlabel('x')
+ax2.set_ylabel(r'$f(x)$')
+ax2.set_title(r'Convexa: $f(x) = x^2$ → $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$')
+ax2.legend(loc='upper left', framealpha=1)
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout(w_pad=3)
+plt.savefig('jensen_plot.svg', format='svg', bbox_inches='tight')
+plt.close()
+```
+
+::: {.callout-note collapse="true"}
+## Prueba: $D_{KL} \geq 0$ (Desigualdad de Gibbs)
+
+La **desigualdad de Gibbs** establece que la divergencia KL es siempre no negativa:
+
+$$
+D_{KL}(P \| Q) \geq 0
+$$
+
+Menos cuando $P=Q$, que será cuando las dos distribuciones sean idénticas, y por tanto, 
+la distancia entre ellas sea 0. Este resultado es 
+fundamental en teoría de la información y lleva el nombre del físico Josiah Willard Gibbs. 
+Para demostrarla, utilizamos la **desigualdad de Jensen**.
+
+### Recordatorio: Desigualdad de Jensen
+
+La desigualdad de Jensen relaciona el valor esperado de una función con la función del valor esperado:
+
+- **Función cóncava $\rightarrow$ **  $\mathbb{E}[f(X)] \leq f(\mathbb{E}[X])$: Para una función 
+concava, el valor esperado de su función siempre será **menor** que la función de su valor esperado (ej: $\log$). 
+- **Función convexa $\rightarrow$ ** $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$: Para una función 
+convexa, el valor esperado de la función siempre sera **mayor** que la función de su valor esperado (ej: $x^2$).
+
+![Desigualdad de Jensen](jensen_plot.svg){width=100%}
+
+
+En los gráficos tenemos dos valores de ejemplo: $x_1$ y $x_2$ (puntos rojos sobre la curva).
+
+- **Línea roja discontinua**: conecta los dos puntos rojos. Representa qué pasaría si interpoláramos 
+linealmente entre $f(x_1)$ y $f(x_2)$.
+
+- **Punto naranja** $\mathbb{E}[f(X)]$: es el promedio de $f(x_1)$ y $f(x_2)$. Como promediar es una 
+operación lineal, este punto cae sobre la línea roja.
+
+- **Punto verde** $f(\mathbb{E}[X])$: primero calculamos el promedio de $x_1$ y $x_2$, y luego 
+evaluamos $f$ en ese punto. Por eso cae directamente sobre la curva.
+
+
+Para funciones **cóncavas**, la curva queda por encima de la línea roja que conecta los puntos, así 
+que el punto verde siempre estará más arriba que el naranja ($f(\mathbb{E}[X]) \geq \mathbb{E}[f(X)]$). Para 
+funciones **convexas**, la curva queda por debajo, así que el punto naranja siempre estará 
+más arriba que el verde ($\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$).
+
+
+### Demostración de Gibbs usando Jensen
+
+Una vez hemos entendido esto, volvemos a nuestra definición del KL Divergence:
+
+$$
+D_{KL}(P \| Q) = \sum_x p(x) \log \frac{p(x)}{q(x)}
+$$
+
+La cual podemos reescribir dando la vuelta a los términos:
+
+$$
+ D_{KL}(P \| Q) = -\sum_x p(x) \log \frac{q(x)}{p(x)}
+$$
+
+Como $\mathbb{E}[X] = \sum_{x} x \cdot p(x)$, podemos reescribir la expresión en términos de esperanza:
+
+$$
+ D_{KL}(P \| Q) =  -\mathbb{E}_p\left[\log \frac{q(x)}{p(x)}\right]
+$$
+
+Y como la función del logaritmo es **cóncava**, podemos aplicar Jensen y decir que el valor esperado 
+de nuestra función será menor que la función del valor esperado:
+
+$$
+ \mathbb{E}_p\left[\log \frac{q(x)}{p(x)}\right] \leq \log \left( \mathbb{E}_p\left[\frac{q(x)}{p(x)}\right] \right)
+$$
+
+
+Evaluamos la esperanza del lado derecho:
+
+$$
+\mathbb{E}_p\left[\frac{q(x)}{p(x)}\right] = \sum_x \cancel{p(x)} \frac{q(x)}{\cancel{p(x)}} = \sum_x q(x)
+$$
+
+Y como el sumatorio de una distribución es 1, nos queda:
+
+$$
+\mathbb{E}_p\left[\frac{q(x)}{p(x)}\right] = \sum_x q(x) = 1
+$$
+
+
+Volvemos a la desigualdad de Jensen con este resultado:
+
+$$
+ \mathbb{E}_p\left[\log \frac{q(x)}{p(x)}\right] \leq \log(1) = 0
+$$
+
+Ahora lo sustituimos en la expresión que teníamos antes, la del KL Divergence:
+$$
+  D_{KL}(P \| Q) = -\mathbb{E}_p\left[\log \frac{q(x)}{p(x)}\right] \geq 0
+$$
+
+Que es lo mismo que:
+
+$$
+  D_{KL}(P \| Q) = \mathbb{E}_p\left[\log \frac{p(x)}{q(x)}\right] \geq  0
+$$
+
+Lo cual podemos reescribir de la misma manera que teníamos al principio:
+
+$$
+  D_{KL}(P \| Q) = \sum_x p(x) \log \frac{p(x)}{q(x)} \geq  0
+$$
+
+
+¡Tachán! Aquí es donde queríamos llegar. Ya sabemos que la KL divergence siempre tiene que ser mayor que 0:
+$$
+{D_{KL}(P \| Q) \geq 0}
+$$
+
+Esto completa la demostración de la **desigualdad de Gibbs** utilizando la **desigualdad de Jensen**.
+:::
+
+
+
+
+::: {#fig-vae}
+```{.tikz}
+%%| filename: vae
+%%| format: svg
+
+\usetikzlibrary{positioning,arrows.meta}
+
+\begin{tikzpicture}[
+  node distance=1.8cm,
+  >=Latex,
+  scale=1.2,
+  transform shape,
+  every node/.style={font=\large},
+  arrow/.style={->, thick}
+]
+
+% Variables con texto debajo
+\node (x) {$x$};
+\node[below=0.4cm of x, font=\small] {Input};
+
+% Encoder (trapecio: ancho a la izquierda, estrecho a la derecha)
+\node[right=1.8cm of x] (enc_center) {};
+\draw[thick] 
+  ([xshift=-1cm, yshift=0.7cm] enc_center.center) -- 
+  ([xshift=1cm, yshift=0.5cm] enc_center.center) -- 
+  ([xshift=1cm, yshift=-0.5cm] enc_center.center) -- 
+  ([xshift=-1cm, yshift=-0.7cm] enc_center.center) -- cycle;
+\node[yshift=0.15cm] at (enc_center) {\textbf{Encoder}};
+\node[yshift=-0.25cm, font=\small] at (enc_center) {$q_\phi(z|x)$};
+
+% Variable latente
+\node[right=1.8cm of enc_center] (z) {$z$};
+\node[below=0.4cm of z, font=\small] {Latent};
+
+% Decoder (trapecio: estrecho a la izquierda, ancho a la derecha)
+\node[right=1.8cm of z] (dec_center) {};
+\draw[thick] 
+  ([xshift=-1cm, yshift=0.5cm] dec_center.center) -- 
+  ([xshift=1cm, yshift=0.7cm] dec_center.center) -- 
+  ([xshift=1cm, yshift=-0.7cm] dec_center.center) -- 
+  ([xshift=-1cm, yshift=-0.5cm] dec_center.center) -- cycle;
+\node[yshift=0.15cm] at (dec_center) {\textbf{Decoder}};
+\node[yshift=-0.25cm, font=\small] at (dec_center) {$p_\theta(x|z)$};
+
+% Reconstrucción
+\node[right=1.8cm of dec_center] (xhat) {$\hat{x}$};
+\node[below=0.4cm of xhat, font=\small] {Reconstruction};
+
+% Flechas
+\draw[arrow] (x) -- ([xshift=-1cm] enc_center.center);
+\draw[arrow] ([xshift=1cm] enc_center.center) -- (z);
+\draw[arrow] (z) -- ([xshift=-1cm] dec_center.center);
+\draw[arrow] ([xshift=1cm] dec_center.center) -- (xhat);
+
+\end{tikzpicture}
+```
+VAE diagram
+:::
 
 ## El problema que queremos resolver
 
@@ -129,7 +551,18 @@ Como la KL siempre es no-negativa, maximizar el ELBO también acerca nuestra apr
 
 ## Referencias
 
-Esto lo he sacado de:
-- Kingma & Welling (2013) - Auto-Encoding Variational Bayes
-- Doersch (2016) - Tutorial on Variational Autoencoders
-- Mis notas de cuando intenté implementar un VAE y no entendía nada
+Una pregunta rápida a chatgpt sobre recursos para aprender inferencia variacional nos dará este tipo de cosas:
+
+- Kevin Murphy - "Probabilistic Machine Learning", Volúmenes 1 y 2. El primero sobre probabilidad, Bayes y modelos gráficos, y el segundo sí que trata más en profundidad el VI.
+- David Blei, Alp kucukelbir, Jon McAuliffe (2017) - "Variational Inference: A Review for Statisticians"
+- Kingma & Welling (2013) - Auto-Encoding Variational Bayes.
+- El mítico "Pattern Recognition and Machine Learning" de Bishop.
+- McElreath - Statistical Rethinking.
+
+Tan útiles e interesantes como infumables. 
+
+Yo he seguido este video, que es bastante más claro:
+
+- [Mathing the Variational AutoEncoder: Deriving the ELBO Loss](https://www.youtube.com/watch?v=jJZadDULoH4). Aunque en el desarrollo se le va un poco de las manos, sigue siendo el recurso más claro que he encontrado.
+
+

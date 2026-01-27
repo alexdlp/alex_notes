@@ -20,6 +20,9 @@ website:
   page-footer:
     left: "Alex de la Puente"
 
+filters:
+  - danmackinlay/tikz
+
 format:
   html:
     theme:

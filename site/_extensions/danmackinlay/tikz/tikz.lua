@@ -178,8 +178,12 @@ local function compile_tikz_to_svg(code, user_opts, conf, basename)  -- Added co
   if not check_dependency('pdflatex') then
     error("pdflatex not found. Please install LaTeX to compile TikZ diagrams.")
   end
-  if not check_dependency('inkscape') then
-    error("Inkscape not found. Please install Inkscape to convert PDFs to SVG.")
+
+  local has_pdf2svg = check_dependency('pdf2svg')
+  local has_inkscape = check_dependency('inkscape')
+
+  if not has_pdf2svg and not has_inkscape then
+    error("No PDF to SVG converter found. Please install pdf2svg or Inkscape.")
   end
 
   local function process_in_dir(dir)
@@ -235,20 +239,24 @@ $body$
           "\nTikZ Code:\n" .. code)
       end
 
-      -- Convert PDF to SVG using Inkscape
-      local args = {
-        '--pages=1',
-        '--export-area-drawing',
-        '--export-type=svg',
-        '--export-plain-svg',
-        '--export-margin=0',
-        '--export-filename=' .. svg_file,
-        pdf_file
-      }
-      local success_inkscape, inkscape_result = pcall(pandoc.pipe, 'inkscape', args, '')
-      if not success_inkscape then
+      -- Convert PDF to SVG (prefer pdf2svg, fallback to inkscape)
+      local success_convert, convert_result
+      if has_pdf2svg then
+        success_convert, convert_result = pcall(pandoc.pipe, 'pdf2svg', { pdf_file, svg_file }, '')
+      else
+        local args = {
+          '--export-area-drawing',
+          '--export-type=svg',
+          '--export-plain-svg',
+          '--export-filename=' .. svg_file,
+          pdf_file
+        }
+        success_convert, convert_result = pcall(pandoc.pipe, 'inkscape', args, '')
+      end
+
+      if not success_convert then
         error("Error converting PDF to SVG for TikZ figure '" .. base_filename .. "':\n" ..
-          tostring(inkscape_result) .. "\nTikZ Code:\n" .. code)
+          tostring(convert_result) .. "\nTikZ Code:\n" .. code)
       end
 
       -- Read the SVG file

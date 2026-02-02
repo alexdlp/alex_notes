@@ -22,6 +22,15 @@ jobs:
       - name: Install Python dependencies
         run: uv sync
 
+      - name: Install LaTeX and Inkscape
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-latex-recommended \
+            texlive-pictures \
+            texlive-fonts-recommended \
+            inkscape
+
       - name: Render Quarto Project
         run: |
           cd site

@@ -12,11 +12,11 @@ jupyter: python3
 
 
 
-Bueno, pues vamos a intentar derivar la funcion de pérdida de un autoencoder variacional.
+Bueno, pues vamos a intentar derivar la función de pérdida de un autoencoder variacional.
 
 En un autoencoder normal, lo que hacemos es usar el error de reconstrucción como función 
-de pérdida. Pero, y ¿Luego que? ¿Cómo lo hacemos variacional? ¿Y que ~~coño~~ es variacional? 
-¿Que son todas esas historias del ELBO, el KL Divergence y demás jeroglíficos arcanos?
+de pérdida. Pero, y ¿luego qué? ¿Cómo lo hacemos variacional? ¿Y qué ~~cojones~~ significa variacional? 
+¿Qué son todas esas historias del ELBO, el KL Divergence y demás jeroglíficos?
 
 
 
@@ -24,7 +24,7 @@ Paso a paso. Vamos a ver:
 
 ## Del autoencoder convencional al variacional
 
-Aquí tenemos el esquema de un vanila autoencoder.
+Aquí tenemos el esquema de un vanilla autoencoder.
 
 ::: {#fig-vae1 style="float: right; margin-right: 20px; margin-bottom: 20px;"}
 ```{.tikz}
@@ -88,10 +88,10 @@ Los datos de entrada $x$ se comprimen por el encoder en un espacio latente $z$ q
 el decoder toma como input para reconstruir $\hat{x}$ usando como función de pérdida el 
 error de reconstrucción (algo como el MSE, o el MAE, lo que queramos). 
 
-Hasta aqui todo bien, todo correcto. ¿Cuál es el problema? Pues que sabe diós la forma que 
+Hasta aquí todo bien, todo correcto. ¿Cuál es el problema? Pues que sabe dios la forma que 
 tomará ese espacio latente $z$, porque no tenemos ningún tipo de control sobre ella.
 
-Dado que ese espacio latente puede tomar formas incomodas con las que prefeririamos no tener
+Dado que ese espacio latente puede tomar formas incómodas con las que preferiríamos no tener
 que tratar, lo que vamos a hacer es mapearlo a una distribución gaussiana. Esto es lo que convierte a nuestro
 autoencoder clásico en uno **variacional**:
 
@@ -107,12 +107,12 @@ Aquí va el contenido oculto que se despliega al hacer clic.
 Puedes incluir ecuaciones, código, imágenes, etc.
 :::
 
-¿Y como se hace esto? Pues añadiendo un segundo término a nuestra funcion de pérdida basada 
+¿Y cómo se hace esto? Pues añadiendo un segundo término a nuestra función de pérdida basada 
 en la reconstrucción que teníamos antes. 
 
-Lo que queremos es una nueva función de pérdida que penalize 
-al modelo si no es capaz de que $z$ se aproxime a una gaussiana. Hay varias manera de 
-hacerlo (por lo visto), pero la mas habitual es la KL divergence. 
+Lo que queremos es una nueva función de pérdida que penalice 
+al modelo si no es capaz de que $z$ se aproxime a una gaussiana. Hay varias maneras de 
+hacerlo (por lo visto), pero la más habitual es la KL divergence. 
 
 De manera que nuestra nueva y awesome loss function nos quedaría tal que así:
 
@@ -127,9 +127,9 @@ $$
 
 Una divergencia es una manera de medir la distancia entre distribuciones. Es decir, 
 estas dos distribuciones ¿cuánto se parecen? ¿Mucho?¿Poco? ¿Están cerca? ¿Están lejos? Evidentemente 
-si estan cerca es que *se parecen* mucho, y sino, es que se parecen poco. 
+si están cerca es que *se parecen* mucho, y si no, es que se parecen poco. 
 
-Matematicamente, mediamos la distancia entre dos distribuciones $P$ y $Q$ como:
+Matemáticamente, medimos la distancia entre dos distribuciones $P$ y $Q$ como:
 
 $$
 D_{KL}(P \| Q) = \sum_{x \in \mathrm{X}} p(x) \log \frac{p(x)}{q(x)} \quad \text{o} \quad \int p(x) \log \frac{p(x)}{q(x)} \, dx
@@ -148,14 +148,14 @@ $$
 D_{KL}(P \| Q) = \underbrace{\sum_{x \in \mathrm{X}} p(x) \log p(x)}_{-H(P) \, \text{Negative Entropy}} - \underbrace{\sum_{x \in \mathrm{X}} p(x) \log q(x)}_{CE(P,Q) \, \text{Negative Cross Entropy}}
 $$
 
-Esta reorganización tampoco es que nos diga mucho ahora mismo, pero podriamos reescribir la divergencia:
+Esta reorganización tampoco es que nos diga mucho ahora mismo, pero podríamos reescribir la divergencia:
 
 $$
 D_{KL} = CE(P,Q) - H(P) \Leftrightarrow CE(P,Q) = D_{KL} + H(P)
 $$
 
 Esta identidad tiene su origen en la teoría de la información de Shannon, pero ni es el tema de hoy, ni nos ayuda 
-a deribar y entener la inferencia variacional ni nada, por lo que lo dejamos en el cajón para otro día. De momento,
+a derivar y entender la inferencia variacional ni nada, por lo que lo dejamos en el cajón para otro día. De momento,
 solo nos tenemos que quedar con esto: 
 
 $$
@@ -274,9 +274,9 @@ Para demostrarla, utilizamos la **desigualdad de Jensen**.
 La desigualdad de Jensen relaciona el valor esperado de una función con la función del valor esperado:
 
 - **Función cóncava $\rightarrow$ **  $\mathbb{E}[f(X)] \leq f(\mathbb{E}[X])$: Para una función 
-concava, el valor esperado de su función siempre será **menor** que la función de su valor esperado (ej: $\log$). 
+cóncava, el valor esperado de su función siempre será **menor** que la función de su valor esperado (ej: $\log$). 
 - **Función convexa $\rightarrow$ ** $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$: Para una función 
-convexa, el valor esperado de la función siempre sera **mayor** que la función de su valor esperado (ej: $x^2$).
+convexa, el valor esperado de la función siempre será **mayor** que la función de su valor esperado (ej: $x^2$).
 
 ![Desigualdad de Jensen](jensen_plot.svg){width=100%}
 
@@ -301,7 +301,7 @@ más arriba que el verde ($\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$).
 
 ### Demostración de Gibbs usando Jensen {#gibbs}
 
-Una vez hemos entendido esto, volvemos a nuestra definición del KL Divergence:
+Una vez hemos entendido esto, volvemos a nuestra definición de la KL Divergence:
 
 $$
 D_{KL}(P \| Q) = \sum_x p(x) \log \frac{p(x)}{q(x)}
@@ -433,7 +433,7 @@ Bayes' rule
 ::: {.callout-note collapse="true"}
 ## Repaso Regla de Bayes
 
-Conviene repasar brevemente de donde sale el chisme este. 
+Conviene repasar brevemente de dónde sale el chisme este. 
 
 ### Probabilidad conjunta y condicional
 
@@ -444,7 +444,7 @@ Esta probabilidad conjunta siempre se puede factorizar usando la definición de 
 
 $$p(x,z) = p(z|x) \cdot p(x)$$
 
-Que también podemos escribir asi:
+Que también podemos escribir así:
 
 $$p(x,z) = p(x|z) \cdot p(z)$$
 
@@ -456,14 +456,14 @@ $$p(z|x)  =  \frac{p(x|z) \cdot p(z)}{p(x)} $$
 Así es como obtenemos los términos:
 
 * **Posterior $p(z|x)$:** distribución de $z$ después de haber observado $x$. Esto es lo 
-que queremos calcular, y muchas veces lo veremos referido como la "actualizacion de nuestras 
+que queremos calcular, y muchas veces lo veremos referido como la "actualización de nuestras 
 creencias previas  (prior) tras haber observado los datos (likelihood)".
-* **Prior $p(z)$:** Lo que creiamos sobre $z$ antes de observar los datos $x$. Esto 
+* **Prior $p(z)$:** Lo que creíamos sobre $z$ antes de observar los datos $x$. Esto 
 quizás es lo más tricky. Una manera fácil de tener cierta intuición sobre esto es que 
-si tuviesemos un dado de 6 caras y $z$ representa nuestra hipótesis de si esta cargado o no ($z=\{justo, cargado \}$);
+si tuviésemos un dado de 6 caras y $z$ representa nuestra hipótesis de si está cargado o no ($z=\{justo, cargado \}$);
 si nunca lo he lanzado pero confío en que es justo, mi prior sería algo como 
 $p(z=\text{justo})=0.9$ y $p(z=\text{cargado})=0.1$. 
-* **Likelihood $p(x|z)$:** probabilidad^[en puridad matemática, el likelihood es **una funcion de $z$**, no 
+* **Likelihood $p(x|z)$:** probabilidad^[en puridad matemática, el likelihood es **una función de $z$**, no 
 una distribución de probabilidad (no tiene por qué sumar 1 sobre $z$). Pero para este contexto didáctico-educativo 
 es válido llamarlo *probabilidad*] de observar los datos $x$ dado $z$. Responde a la pregunta: si este 
 valor de $z$ fuese correcto, ¿cómo de probable sería ver estos datos $x$?. En el ejemplo del dado: si mi 
@@ -567,7 +567,7 @@ VAE diagram
 Esto es interesante. Pensemos en un conjunto de datos observados de entrenamiento $x$. Puede 
 que no conozcamos su distribución $p(x)$ pero, ¿podemos aprender una distribución condicional $p(z|x)$ 
 con la cual podamos mapear los datos $x$ a una distribución conocida (¿p. ej. gaussiana? Aunque realmente lo 
-podriamos mapear a cualquier distribución) ?
+podríamos mapear a cualquier distribución) ?
 
 Lo que nos gustaría sería que nuestro encoder calculase la posterior real $p(z|x)$. Pero ya hemos 
 visto que para poder hacerlo necesitamos la evidence $p(x)$, que no podemos obtener porque es intratable. ¿So what?
@@ -589,7 +589,7 @@ el autoencoder variacional lo hace es usando algo conocido como la Evidence Lowe
 
 ## Evidence Lower Bound
 
-Pff esta siendo denso eh 😅. 
+Pff está siendo denso, eh 😅. 
 
 Venga, recap. Ahora tenemos dos cosas:
 
@@ -602,7 +602,7 @@ $$D_{KL}(q_{\phi}(z|x)||p(z|x)) = \sum_{z \in \mathrm{Z}} q_{\phi}(z|x) \log\lef
 
 Es decir, nuestro objetivo va a ser minimizar esta expresión. 
 
-Vamos a operar un poco. La posterior la podemos sustituir en funcion de la conjunta. Como $p(x,z) = p(z|x) \cdot p(x) \rightarrow p(z|x) = \frac{p(x,z)}{p(x)}$:
+Vamos a operar un poco. La posterior la podemos sustituir en función de la conjunta. Como $p(x,z) = p(z|x) \cdot p(x) \rightarrow p(z|x) = \frac{p(x,z)}{p(x)}$:
 
 $$\sum_{z \in \mathrm{Z}} q_{\phi}(z|x) \log\left(\frac{q_{\phi}(z|x)p(x)}{p(z,x)}\right)$$
 
@@ -633,7 +633,7 @@ De nuevo, por la probabilidad conjunta $p(x,z) = p(x|z)p(z)$:
 
 $$ - \sum_{z \in \mathrm{Z}} q_{\phi}(z|x) \log\left(\frac{q_{\phi}(z|x)}{p(x|z)p(z)}\right) \leq \log(p(x))$$
 
-Y el damos la vuelta al logaritmo para eliminar el negativo:
+Y le damos la vuelta al logaritmo para eliminar el negativo:
 
 $$
 \underbrace{\sum_{z \in \mathrm{Z}} q_{\phi}(z\mid x)\,
@@ -646,7 +646,7 @@ Este primer término es al que se conoce como Evidence Lower Bound o ELBO.
 
 Hemos llegado a una expresión en la cual todo es computable o entrenable por una red neuronal. El término de la derecha 
 sigue siendo intratable, pero **hemos encontrado un límite inferior**. Hemos encontrado una función, una fórmula, 
-que ¡siempre será menor o igual al logarítmo de lo que queremos calcular!
+que ¡siempre será menor o igual al logaritmo de lo que queremos calcular!
 
 Por tanto, siempre que maximicemos el ELBO, estaremos maximizando también $p(x)$ de manera efectiva.
 
@@ -660,8 +660,8 @@ resolviendo el problema **sin tener que calcular $p(x)$** explícitamente.
 
 ## Reescribiendo ELBO
 
-Ahora nuestro autoencoder se convierte en un problema de máximización del ELBO a partir de los parámetros del 
-encoder $\phi$ y los del decoder $\theta$. Reescribámos la expresión del ELBO de una forma que tenga 
+Ahora nuestro autoencoder se convierte en un problema de maximización del ELBO a partir de los parámetros del 
+encoder $\phi$ y los del decoder $\theta$. Reescribamos la expresión del ELBO de una forma que tenga 
 más sentido para nuestra red neuronal:
 
 
@@ -696,7 +696,7 @@ Con lo que nos quedaría:
 $$-D_{KL}(q_{\phi}(z|x) || p(z)) + \underbrace{\mathbb{E}_{q_{\phi}}[\log(p_{\theta}(x|z))]}_{\text{Log-likelihood}} \leq \log(p(x))$$
 
 
-Este segundo término se empieza a parecer (***es***) el ***Log-likelihood*** loss. Basicamente, el error de reconstrucción.
+Este segundo término se empieza a parecer (***es***) el ***Log-likelihood*** loss. Básicamente, el error de reconstrucción.
 
 
 :::{.callout-note}
@@ -714,14 +714,14 @@ $$-D_{KL} + \text{Reconstruction loss} \leq \log(p(x))$${#eq-kl-def}
 
 Podríamos haber terminado aquí, pero queremos encontrar la forma final de la fórmula. Lo 
 que vamos a hacer ahora es computar el $D_{KL}$ específicamente para el caso gaussiano (si 
-quisiésemos hacer esto para un caso que no fuese el gaussiano tendriamos que rehacer este cálculo).
+quisiésemos hacer esto para un caso que no fuese el gaussiano tendríamos que rehacer este cálculo).
 
 Partiendo de la ecuación:
 
 $$D_{KL}(q_{\phi}(z|x) || p(z)) = \sum_{z} q_{\phi}(z|x) \log\left(\frac{q_{\phi}(z|x)}{p(z)}\right)$$
 
 Y sustituyendo las distribuciones $q_{\phi}(z|x)$ y $p(z)$ por sus respectivas fórmulas analíticas 
-gaussianas, llegamos a la siguiente expresion:
+gaussianas, llegamos a la siguiente expresión:
 
 $$D_{KL} = \frac{1}{2}\left(\sigma_q^2 + \mu_q^2 - 1 - \log(\sigma_q^2)\right)$$
 
@@ -731,8 +731,8 @@ title="Paso a paso: $D_{KL}(\mathcal{N}(\mu_q,\sigma_q^2)||\mathcal{N}(0,1))$"
 appearance="minimal"}
 Nuestras distribuciones son:
 
-* $q_{\phi}(z|x) \sim N(\mu_q, \sigma_q)$: Nuestra distribución posterior predicha por el encoder.
-* $p(z) \sim N(\mu_p, \sigma_p)$: La distribución gaussiana estándar a la cual queremos que se ajuste el espacio latente $z$.
+* $q_{\phi}(z|x) \sim N(\mu_q, \sigma_q^2)$: Nuestra distribución posterior predicha por el encoder.
+* $p(z) \sim N(\mu_p, \sigma_p^2)$: La distribución gaussiana estándar a la cual queremos que se ajuste el espacio latente $z$.
 
 Las gaussianas univariantes de nuestras distribuciones son:
 
@@ -740,9 +740,9 @@ $$q_{\phi}(z|x) = \frac{1}{\sqrt{2\pi\sigma_q^2}} e^{-\frac{(z-\mu_q)^2}{2\sigma
 
 $$p(z) = \frac{1}{\sqrt{2\pi\sigma_p^2}} e^{-\frac{(z-\mu_p)^2}{2\sigma_p^2}}$$
 
-Las sustituímos por lo que tenemos dentro del logarítmo:
+Las sustituimos por lo que tenemos dentro del logaritmo:
 
-$$D_{KL} = \sum_{z}  q_{\phi}p(z|x)\log\left(\frac{\frac{1}{\sqrt{2\pi\sigma_q^2}} e^{-\frac{(z-\mu_q)^2}{2\sigma_q^2}}}{\frac{1}{\sqrt{2\pi\sigma_p^2}} e^{-\frac{(z-\mu_p)^2}{2\sigma_p^2}}}\right)$$
+$$D_{KL} = \sum_{z}  q_{\phi}(z|x)\log\left(\frac{\frac{1}{\sqrt{2\pi\sigma_q^2}} e^{-\frac{(z-\mu_q)^2}{2\sigma_q^2}}}{\frac{1}{\sqrt{2\pi\sigma_p^2}} e^{-\frac{(z-\mu_p)^2}{2\sigma_p^2}}}\right)$$
 
 Primero simplificamos el logaritmo. Separamos la fracción:
 
@@ -811,11 +811,11 @@ Sustituimos en @eq-kl-def:
 $$ - \frac{1}{2}\left(\sigma_q^2 + \mu_q^2 - 1 - \log(\sigma_q^2)\right) + \mathbb{E}_{q_{\phi}}[\log(p_{\theta}(x|z))] \leq \log(p(x))$$
 
 Esta es casi nuestra función de pérdida final. Esto es el ELBO para el caso específico gaussiano. Y nuestro objetivo es maximizarlo. 
-Nuestro objetivo es, mas concretamente, maximizarlo respecto a los parámetros $\phi$ y $\theta$ de nuestra red neuronal.
+Nuestro objetivo es, más concretamente, maximizarlo respecto a los parámetros $\phi$ y $\theta$ de nuestra red neuronal.
 
 $$\max_{\phi,\theta}  - \frac{1}{2}\left(\sigma_q^2 + \mu_q^2 - 1 - \log(\sigma_q^2)\right) + \mathbb{E}_{q_{\phi}}[\log(p_{\theta}(x|z))]$$
 
-Pero, como todos sabemos, el descenso del gradiente no maximiza, minimiza. Por lo que, lo que haremos será minimizar el negativo
+Pero, como todos sabemos, el descenso del gradiente no maximiza: minimiza. Por lo que, lo que haremos será minimizar el negativo
 de esta función:
 
 $$ \min_{\phi,\theta}  -\left[ - \frac{1}{2}\left(\sigma_q^2 + \mu_q^2 - 1 - \log(\sigma_q^2)\right) + \mathbb{E}_{q_{\phi}}[\log(p_{\theta}(x|z))] \right]$$
@@ -824,15 +824,15 @@ Reformulando:
 
 $$ \min_{\phi,\theta}  \frac{1}{2}\left(\sigma_q^2 + \mu_q^2 - 1 - \log(\sigma_q^2)\right) - \mathbb{E}_{q_{\phi}}[\log(p_{\theta}(x|z))]$$
 
-**Ésta es la función de pérdida que vamos a implementar.**
+**Esta es la función de pérdida que vamos a implementar.**
 
 
 ## Referencias
 
-Una pregunta rápida a chatgpt sobre recursos para aprender inferencia variacional nos dará este tipo de cosas:
+Una pregunta rápida a ChatGPT sobre recursos para aprender inferencia variacional nos dará este tipo de cosas:
 
 - Kevin Murphy - "Probabilistic Machine Learning", Volúmenes 1 y 2. El primero sobre probabilidad, Bayes y modelos gráficos, y el segundo sí que trata más en profundidad el VI.
-- David Blei, Alp kucukelbir, Jon McAuliffe (2017) - "Variational Inference: A Review for Statisticians"
+- David Blei, Alp Kucukelbir, Jon McAuliffe (2017) - "Variational Inference: A Review for Statisticians"
 - Kingma & Welling (2013) - Auto-Encoding Variational Bayes.
 - El mítico "Pattern Recognition and Machine Learning" de Bishop.
 - McElreath - Statistical Rethinking.
@@ -842,5 +842,3 @@ Tan útiles e interesantes como infumables.
 Yo he seguido este video, que es bastante más claro:
 
 - [Mathing the Variational AutoEncoder: Deriving the ELBO Loss](https://www.youtube.com/watch?v=jJZadDULoH4). Aunque en el desarrollo se le va un poco de las manos, sigue siendo el recurso más claro que he encontrado.
-
-

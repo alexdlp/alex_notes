@@ -30,7 +30,10 @@ jobs:
             texlive-latex-extra \
             texlive-pictures \
             texlive-fonts-recommended \
-            pdf2svg
+            inkscape
+
+      - name: Render generated images
+        run: site/posts/vae-elbo-loss/images/render_images.sh
 
       - name: Render Quarto Project
         run: |

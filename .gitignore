@@ -21,3 +21,6 @@ venv/
 .DS_Store
 
 **/*.quarto_ipynb
+
+# Generated images
+*.svg

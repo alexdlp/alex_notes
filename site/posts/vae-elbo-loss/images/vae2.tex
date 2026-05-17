@@ -13,7 +13,7 @@
 ]
 
 % Variables con texto debajo
-\node (x) {$x$};
+\node (x) {\textit{x}};
 \node[below=0.4cm of x, font=\small] {Input};
 
 % Encoder (trapecio: ancho a la izquierda, estrecho a la derecha)
@@ -27,7 +27,7 @@
 \node[yshift=-0.25cm, font=\small] at (enc_center) {$q_\phi(z|x)$};
 
 % Variable latente
-\node[right=1.8cm of enc_center] (z) {$z$};
+\node[right=1.8cm of enc_center] (z) {\textit{z}};
 \node[below=0.4cm of z, font=\small] {Latent};
 
 % Decoder (trapecio: estrecho a la izquierda, ancho a la derecha)
@@ -41,7 +41,7 @@
 \node[yshift=-0.25cm, font=\small] at (dec_center) {$p_\theta(x|z)$};
 
 % Reconstrucción
-\node[right=1.8cm of dec_center] (xhat) {$\hat{x}$};
+\node[right=1.8cm of dec_center] (xhat) {$\hat{\textit{x}}$};
 \node[below=0.4cm of xhat, font=\small] {Reconstruction};
 
 % Flechas

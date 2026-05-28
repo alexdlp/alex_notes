@@ -21,9 +21,13 @@ render_tikz() {
     -output-directory "$tmpdir" \
     "$tmpdir/${name}.tex" >/dev/null
 
-  inkscape "$tmpdir/${name}.pdf" \
-    --export-text-to-path \
-    --export-filename="$script_dir/${name}.svg" >/dev/null 2>&1
+  inkscape --pdf-poppler "$tmpdir/${name}.pdf" \
+    --export-filename="$script_dir/${name}.svg" >/dev/null
+
+  if grep -Eq '<text|font-family' "$script_dir/${name}.svg"; then
+    printf 'Generated %s.svg still depends on font-rendered text\n' "$name" >&2
+    exit 1
+  fi
 
   rm -rf "$tmpdir"
 }

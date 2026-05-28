@@ -22,6 +22,7 @@ render_tikz() {
     "$tmpdir/${name}.tex" >/dev/null
 
   inkscape "$tmpdir/${name}.pdf" \
+    --export-text-to-path \
     --export-filename="$script_dir/${name}.svg" >/dev/null 2>&1
 
   rm -rf "$tmpdir"

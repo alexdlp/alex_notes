@@ -1,0 +1,20 @@
+---
+title: "Variational Inference and ELBO Loss"
+description: "A step-by-step derivation of the ELBO loss function in VAEs"
+author: "Alex de la Puente"
+date: "2026-01-25"
+categories: [machine-learning, vae, mathematics]
+format: html
+---
+
+This is the English test version of the VAE article.
+
+The full translation is not written yet. This page exists to validate the multilingual Quarto pipeline with `babelquarto`, including the language switcher and the generated `/en/` routes.
+
+::: {#fig-vae1 style="float: right; margin-right: 20px; margin-bottom: 20px;"}
+![VAE diagram](images/vae1.svg){fig-alt="VAE diagram"}
+:::
+
+In a vanilla autoencoder, the input data $x$ is compressed by the encoder into a latent representation $z$. The decoder then uses that latent representation to reconstruct $\hat{x}$.
+
+For a variational autoencoder, the encoder learns a distribution over latent variables, usually written as $q_{\phi}(z|x)$, while the decoder models $p_{\theta}(x|z)$.

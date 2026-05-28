@@ -2,6 +2,17 @@ project:
   type: website
   output-dir: ../_site
 
+babelquarto:
+  icon: ""
+  languagelinks: navbar
+  languagecodes:
+    - name: es
+      text: "Español"
+    - name: en
+      text: "English"
+  mainlanguage: "es"
+  languages: ["en"]
+
 website:
   title: "Alex's Notes"
   description: "Notas personales sobre Machine Learning, matemáticas y más"
@@ -38,3 +49,7 @@ format:
 execute:
   freeze: auto
   enabled: false
+
+lang: es
+title-en: "Alex's Notes"
+description-en: "Personal notes about Machine Learning, mathematics, and more"

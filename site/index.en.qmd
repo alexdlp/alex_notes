@@ -1,0 +1,12 @@
+---
+title: "Alex's Notes"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: grid
+  grid-columns: 2
+  fields: [title, date, description]
+  date-format: "D MMMM YYYY"
+---
+
+Welcome to my notes: write-ups, code, derivations, and references I want to keep around.

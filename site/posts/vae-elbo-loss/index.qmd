@@ -119,7 +119,7 @@ $$
 D_{KL}(P \| Q) \geq 0
 $$
 
-Menos cuando $P=Q$, que será cuando las dos distribuciones sean idénticas, y por tanto, 
+Menos cuando $P = Q$, que será cuando las dos distribuciones sean idénticas, y por tanto, 
 la distancia entre ellas sea 0. Este resultado es 
 fundamental en teoría de la información y lleva el nombre del físico Josiah Willard Gibbs. 
 Para demostrarla, utilizamos la **desigualdad de Jensen**.
@@ -221,7 +221,7 @@ $$
 
 ¡Tachán! Aquí es donde queríamos llegar. Ya sabemos que la KL divergence siempre tiene que ser mayor que 0:
 $$
-{D_{KL}(P \| Q) \geq 0}
+D_{KL}(P \| Q) \geq 0
 $$
 
 Esto completa la demostración de la **desigualdad de Gibbs** utilizando la **desigualdad de Jensen**.
@@ -270,7 +270,7 @@ que queremos calcular, y muchas veces lo veremos referido como la "actualizació
 creencias previas  (prior) tras haber observado los datos (likelihood)".
 * **Prior $p(z)$:** Lo que creíamos sobre $z$ antes de observar los datos $x$. Esto 
 quizás es lo más tricky. Una manera fácil de tener cierta intuición sobre esto es que 
-si tuviésemos un dado de 6 caras y $z$ representa nuestra hipótesis de si está cargado o no ($z=\{justo, cargado \}$);
+si tuviésemos un dado de 6 caras y $z$ representa nuestra hipótesis de si está cargado o no ($z \in \{\text{justo}, \text{cargado}\}$);
 si nunca lo he lanzado pero confío en que es justo, mi prior sería algo como 
 $p(z=\text{justo})=0.9$ y $p(z=\text{cargado})=0.1$. 
 * **Likelihood $p(x|z)$:** probabilidad^[en puridad matemática, el likelihood es **una función de $z$**, no 

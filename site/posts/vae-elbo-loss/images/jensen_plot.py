@@ -45,7 +45,7 @@ ax1.annotate(r'$f(\lambda_1 x_1 + \lambda_2 x_2)$', (x_mid, y_curva), textcoords
 
 ax1.axhline(y=0, color='k', linewidth=0.5)
 ax1.axvline(x=0, color='k', linewidth=0.5)
-ax1.set_xlabel('x')
+ax1.set_xlabel(r'$x$')
 ax1.set_ylabel(r'$f(x)$')
 ax1.set_title(r'Cóncava: $f(x) = \log(x)$ → $\mathbb{E}[f(X)] \leq f(\mathbb{E}[X])$')
 ax1.legend(loc='lower right')
@@ -77,7 +77,7 @@ ax2.annotate(r'$f(\lambda_1 x_1 + \lambda_2 x_2)$', (x_mid, y_curva), textcoords
 
 ax2.axhline(y=0, color='k', linewidth=0.5)
 ax2.axvline(x=0, color='k', linewidth=0.5)
-ax2.set_xlabel('x')
+ax2.set_xlabel(r'$x$')
 ax2.set_ylabel(r'$f(x)$')
 ax2.set_title(r'Convexa: $f(x) = x^2$ → $\mathbb{E}[f(X)] \geq f(\mathbb{E}[X])$')
 ax2.legend(loc='upper left', framealpha=1)

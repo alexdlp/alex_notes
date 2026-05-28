@@ -48,4 +48,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-west-1
-        run: aws s3 sync _site s3://alexnotes-blog-2026 --delete
+        run: |
+          aws s3 sync _site s3://alexnotes-blog-2026 --delete
+          aws s3 cp _site s3://alexnotes-blog-2026 \
+            --recursive \
+            --exclude "*" \
+            --include "*.html" \
+            --include "*.svg" \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --metadata-directive REPLACE

@@ -21,8 +21,9 @@
 
   function switchLink(label, href, active) {
     var link = document.createElement("a");
-    link.className = "language-switch-option" + (active ? " active" : "");
+    link.className = "language-switch-option no-external" + (active ? " active" : "");
     link.href = href;
+    link.target = "_self";
     link.textContent = label;
     if (active) {
       link.setAttribute("aria-current", "page");

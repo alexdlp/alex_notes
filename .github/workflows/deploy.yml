@@ -30,7 +30,7 @@ jobs:
 
       - name: Install R dependencies
         run: |
-          Rscript -e 'install.packages("babelquarto", repos = c("https://ropensci.r-universe.dev", "https://cloud.r-project.org"))'
+          Rscript -e 'install.packages("babelquarto", repos = c("https://ropensci.r-universe.dev", Sys.getenv("RSPM")))'
 
       - name: Install LaTeX and PDF tools
         run: |

@@ -17,6 +17,41 @@ pre {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.language-switch-item {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.language-switch-option {
+  color: rgba(255,255,255,0.82);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.34rem 0.48rem;
+  text-decoration: none;
+}
+
+.language-switch-option:hover,
+.language-switch-option:focus {
+  color: white;
+}
+
+.language-switch-option.active {
+  color: var(--bs-primary);
+  background: white;
+}
+
 /* Post listing cards */
 .quarto-listing-default .listing-item {
   border: 1px solid #e0e0e0;
@@ -46,5 +81,4 @@ pre {
   border-radius: 8px;
   padding: 1rem;
 }
-
 

@@ -1,0 +1,60 @@
+<script>
+(function () {
+  function targetPaths(pathname) {
+    var isEnglish = pathname === "/en" || pathname.indexOf("/en/") === 0;
+    var spanishPath = isEnglish ? pathname.replace(/^\/en(?=\/|$)/, "") : pathname;
+    var englishPath = isEnglish ? pathname : "/en" + (pathname === "/" ? "/index.html" : pathname);
+
+    if (spanishPath === "" || spanishPath === "/") {
+      spanishPath = "/index.html";
+    }
+    if (englishPath === "/en" || englishPath === "/en/") {
+      englishPath = "/en/index.html";
+    }
+
+    return {
+      isEnglish: isEnglish,
+      es: spanishPath + window.location.search + window.location.hash,
+      en: englishPath + window.location.search + window.location.hash
+    };
+  }
+
+  function switchLink(label, href, active) {
+    var link = document.createElement("a");
+    link.className = "language-switch-option" + (active ? " active" : "");
+    link.href = href;
+    link.textContent = label;
+    if (active) {
+      link.setAttribute("aria-current", "page");
+    }
+    return link;
+  }
+
+  window.document.addEventListener("DOMContentLoaded", function () {
+    if (window.document.getElementById("languages-links-parent")) {
+      return;
+    }
+
+    var navbarRight = window.document.querySelector("#navbarCollapse .navbar-nav.ms-auto");
+    if (!navbarRight) {
+      return;
+    }
+
+    var paths = targetPaths(window.location.pathname);
+    var item = document.createElement("li");
+    item.className = "nav-item language-switch-item";
+    item.id = "languages-links-parent";
+
+    var switcher = document.createElement("div");
+    switcher.className = "language-switch";
+    switcher.id = "languages-button";
+    switcher.setAttribute("role", "group");
+    switcher.setAttribute("aria-label", "Language");
+    switcher.appendChild(switchLink("ES", paths.es, !paths.isEnglish));
+    switcher.appendChild(switchLink("EN", paths.en, paths.isEnglish));
+
+    item.appendChild(switcher);
+    navbarRight.insertBefore(item, navbarRight.firstChild);
+  });
+})();
+</script>

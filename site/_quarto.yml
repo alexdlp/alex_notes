@@ -39,6 +39,7 @@ format:
     theme:
       light: cosmo
       dark: darkly
+    include-after-body: _includes/language-switch.html
     css: styles.css
     toc: true
     toc-depth: 3

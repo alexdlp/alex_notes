@@ -31,8 +31,9 @@
   }
 
   window.document.addEventListener("DOMContentLoaded", function () {
-    if (window.document.getElementById("languages-links-parent")) {
-      return;
+    var existingLanguageLinks = window.document.getElementById("languages-links-parent");
+    if (existingLanguageLinks) {
+      existingLanguageLinks.remove();
     }
 
     var navbarRight = window.document.querySelector("#navbarCollapse .navbar-nav.ms-auto");
